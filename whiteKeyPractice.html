@@ -98,39 +98,42 @@
         .black-key[data-note="A#"] { left: 228px; }
         .white-key[data-note="B"] { left: 240px; }
     
-        /* 移动端适配 */
+        /* 移动端动态缩放 */
         @media (max-width: 768px) {
             .piano {
-                width: 90vw;
-                max-width: 400px;
-                height: 50vw;
-                min-height: 180px;
+                width: 90vw !important;    /* 动态宽度 */
+                height: calc(90vw * 0.77); /* 保持原比例(200/260≈0.77) */
+                max-width: 520px;          /* 保留桌面放大效果 */
+                min-height: 200px;         /* 高度下限 */
             }
-    
+
+            /* 白键尺寸自动适配 */
             .white-key {
-                width: 11.5%;
-                height: 100%;
-                border-radius: 0 0 8px 8px;
+                width: 14.28% !important;  /* 100% / 7个白键 */
+                left: auto !important;     /* 清除固定定位 */
             }
-    
-            .black-key {
-                width: 7%;
-                height: 55%;
-            }
-    
-            /* 移动端百分比定位 */
+
+            /* 精准百分比定位 */
             .white-key[data-note="C"] { left: 0%; }
-            .black-key[data-note="C#"] { left: 8%; }
-            .white-key[data-note="D"] { left: 11.5%; }
-            .black-key[data-note="D#"] { left: 19.5%; }
-            .white-key[data-note="E"] { left: 23%; }
-            .white-key[data-note="F"] { left: 34.5%; }
-            .black-key[data-note="F#"] { left: 42.5%; }
-            .white-key[data-note="G"] { left: 46%; }
-            .black-key[data-note="G#"] { left: 54%; }
-            .white-key[data-note="A"] { left: 57.5%; }
-            .black-key[data-note="A#"] { left: 65.5%; }
-            .white-key[data-note="B"] { left: 69%; }
+            .black-key[data-note="C#"] { left: 10.77%; }
+            .white-key[data-note="D"] { left: 15.38%; }
+            .black-key[data-note="D#"] { left: 26.15%; }
+            .white-key[data-note="E"] { left: 30.77%; }
+            .white-key[data-note="F"] { left: 46.15%; }
+            .black-key[data-note="F#"] { left: 56.92%; }
+            .white-key[data-note="G"] { left: 61.54%; }
+            .black-key[data-note="G#"] { left: 72.31%; }
+            .white-key[data-note="A"] { left: 76.92%; }
+            .black-key[data-note="A#"] { left: 87.69%; }
+            .white-key[data-note="B"] { left: 92.31%; }
+        }
+
+        /* 小屏幕手机特别优化 */
+        @media (max-width: 375px) {
+            .piano {
+                margin-left: -5vw; /* 负边距补偿定位偏移 */
+                transform: scale(0.95); /* 微调整体缩放 */
+            }
         }
     
         /* 触控优化 */
