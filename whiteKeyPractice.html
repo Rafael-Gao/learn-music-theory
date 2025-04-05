@@ -57,8 +57,8 @@
     
         .white-key {
             position: absolute;
-            width: 7.14%;
-            height: 100%;
+            width: 40px;
+            height: 200px;
             background: linear-gradient(to bottom, #fff 0%, #f8f8f8 100%);
             border: 1px solid #ddd;
             border-radius: 0 0 5px 5px;
@@ -79,6 +79,9 @@
             cursor: pointer;
             z-index: 1;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            -webkit-tap-highlight-color: transparent; /* 新增 */
+            outline: none; /* 新增 */
+            user-select: none; /* 新增 */
         }
     
         /* 桌面端精准定位 */
