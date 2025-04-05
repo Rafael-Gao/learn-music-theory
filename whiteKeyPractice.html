@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>音序练习</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'SimHei', sans-serif;
+        }
+    
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+    
+        .header {
+            text-align: center;
+            padding: 40px 0;
+            background-color: #2c3e50;
+            color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+    
+        .header h1 {
+            font-size: 2.8em;
+            margin: 0;
+            letter-spacing: 2px;
+        }
+    
+        #random-sequence {
+            font-size: 32px;
+            margin: 30px auto;
+            min-height: 48px;
+            letter-spacing: 12px;
+            color: #2c3e50;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s;
+            text-align: center;
+            display: block;
+            width: fit-content;
+        }
+    
+        /* 桌面版钢琴样式 */
+        .piano {
+            position: relative;
+            height: 200px;
+            width: 260px;
+            margin: 30px auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            background: #f0f0f0;
+            padding: 10px;
+        }
+    
+        .white-key {
+            position: absolute;
+            width: 40px;
+            height: 200px;
+            background: linear-gradient(to bottom, #fff 0%, #f8f8f8 100%);
+            border: 1px solid #ddd;
+            border-radius: 0 0 5px 5px;
+            cursor: pointer;
+            transition: all 0.1s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+    
+        .black-key {
+            position: absolute;
+            width: 24px;
+            height: 120px;
+            background: linear-gradient(to bottom, #333 0%, #000 100%);
+            border-radius: 0 0 4px 4px;
+            cursor: pointer;
+            z-index: 1;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+    
+        /* 桌面端精准定位 */
+        .white-key[data-note="C"] { left: 0; }
+        .black-key[data-note="C#"] { left: 28px; }
+        .white-key[data-note="D"] { left: 40px; }
+        .black-key[data-note="D#"] { left: 68px; }
+        .white-key[data-note="E"] { left: 80px; }
+        .white-key[data-note="F"] { left: 120px; }
+        .black-key[data-note="F#"] { left: 148px; }
+        .white-key[data-note="G"] { left: 160px; }
+        .black-key[data-note="G#"] { left: 188px; }
+        .white-key[data-note="A"] { left: 200px; }
+        .black-key[data-note="A#"] { left: 228px; }
+        .white-key[data-note="B"] { left: 240px; }
+    
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .piano {
+                width: 90vw;
+                max-width: 400px;
+                height: 50vw;
+                min-height: 180px;
+            }
+    
+            .white-key {
+                width: 11.5%;
+                height: 100%;
+                border-radius: 0 0 8px 8px;
+            }
+    
+            .black-key {
+                width: 7%;
+                height: 55%;
+            }
+    
+            /* 移动端百分比定位 */
+            .white-key[data-note="C"] { left: 0%; }
+            .black-key[data-note="C#"] { left: 8%; }
+            .white-key[data-note="D"] { left: 11.5%; }
+            .black-key[data-note="D#"] { left: 19.5%; }
+            .white-key[data-note="E"] { left: 23%; }
+            .white-key[data-note="F"] { left: 34.5%; }
+            .black-key[data-note="F#"] { left: 42.5%; }
+            .white-key[data-note="G"] { left: 46%; }
+            .black-key[data-note="G#"] { left: 54%; }
+            .white-key[data-note="A"] { left: 57.5%; }
+            .black-key[data-note="A#"] { left: 65.5%; }
+            .white-key[data-note="B"] { left: 69%; }
+        }
+    
+        /* 触控优化 */
+        @media (hover: none) {
+            .white-key {
+                min-width: 14%;
+                touch-action: manipulation;
+            }
+        }
+    
+        .white-key:hover {
+            background: linear-gradient(to bottom, #f8f8f8 0%, #eee 100%);
+        }
+    
+        .white-key.active {
+            background: linear-gradient(to bottom, #e0e0e0 0%, #d0d0d0 100%);
+            transform: translateY(2px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    
+        .controls {
+            margin: 30px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+    
+        #result {
+            font-size: 24px;
+            min-height: 40px;
+            padding: 12px 30px;
+            border-radius: 25px;
+            transition: all 0.3s;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+    
+        #result.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    
+        .correct {
+            background: #c8f7c5;
+            color: #2b662e;
+            box-shadow: 0 4px 15px rgba(100, 221, 23, 0.2);
+        }
+    
+        .wrong {
+            background: #ffd1d9;
+            color: #cc0000;
+            box-shadow: 0 4px 15px rgba(255, 51, 51, 0.2);
+        }
+    
+        button, select {
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: linear-gradient(to right, #6c5ce7, #a8a4e6);
+            color: white;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+        }
+    
+        select {
+            appearance: none;
+            background: linear-gradient(to right, #ffffff, #f8f8f8);
+            color: #444;
+            border: 1px solid #ddd;
+            padding-right: 35px;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236c5ce7'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 12px;
+        }
+    
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(108, 92, 231, 0.4);
+        }
+    
+        button:active {
+            transform: translateY(1px);
+        }
+    
+        .highlight {
+            background: linear-gradient(to bottom, #6c5ce7 0%, #a8a4e6 100%) !important;
+            box-shadow: 0 0 15px rgba(108, 92, 231, 0.4) !important;
+        }
+        
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            filter: grayscale(0.5);
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html">
+        <header class="header">
+        <h1>MXT乐理学习站</h1>
+        </header>
+    </a>
+
+    <div id="random-sequence"></div>
+    
+    <div class="piano">
+        <div class="white-key" data-note="C"></div>
+        <div class="black-key" data-note="C#"></div>
+        <div class="white-key" data-note="D"></div>
+        <div class="black-key" data-note="D#"></div>
+        <div class="white-key" data-note="E"></div>
+        <div class="white-key" data-note="F"></div>
+        <div class="black-key" data-note="F#"></div>
+        <div class="white-key" data-note="G"></div>
+        <div class="black-key" data-note="G#"></div>
+        <div class="white-key" data-note="A"></div>
+        <div class="black-key" data-note="A#"></div>
+        <div class="white-key" data-note="B"></div>
+    </div>
+
+    <div class="controls">
+        <div>
+            <select id="countSelect">
+                <option value="3">3个音符</option>
+                <option value="4">4个音符</option>
+                <option value="5">5个音符</option>
+                <option value="6">6个音符</option>
+                <option value="7">7个音符</option>
+            </select>
+            <button id="randomBtn">随机生成</button>
+        </div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        // 音频管理对象
+        const audioManager = {
+            cache: {},
+            
+            init() {
+                // 预加载所有音频
+                ['C', 'D', 'E', 'F', 'G', 'A', 'B'].forEach(note => {
+                    this.cache[note] = new Audio(`sounds/${note}.mp3`);
+                    this.cache[note].load(); // 显式预加载
+                });
+            },
+            
+            play(note) {
+                const audio = this.cache[note];
+                if(!audio) return Promise.reject('音频未加载');
+                
+                audio.currentTime = 0; // 重置播放位置
+                return audio.play().catch(e => {
+                    console.warn(`音频${note}播放失败:`, e);
+                });
+            }
+        };
+    
+        // 初始化音频
+        window.addEventListener('DOMContentLoaded', () => {
+            audioManager.init();
+        });
+    
+        let randomSequence = [];
+        let userInput = [];
+        let isActive = false;
+        let isPlaying = false;
+        const resultDiv = document.getElementById('result');
+        const sequenceDiv = document.getElementById('random-sequence');
+    
+        // 钢琴点击事件
+        document.querySelectorAll('.white-key').forEach(key => {
+            key.addEventListener('mousedown', function() {
+                if (!isActive || isPlaying) return;
+                
+                this.classList.add('active');
+                const note = this.dataset.note;
+                
+                // 播放音频
+                audioManager.play(note);
+                
+                userInput.push(note);
+                
+                if (userInput.length === randomSequence.length) {
+                    const isCorrect = JSON.stringify(userInput) === JSON.stringify(randomSequence);
+            
+                    if (!isCorrect) {
+                        resultDiv.textContent = '✗ 错误！正在演示正确顺序...';
+                        resultDiv.className = 'wrong visible';
+                        setTimeout(() => {
+                            playCorrectSequence(randomSequence);
+                        }, 500);
+                    } else {
+                        resultDiv.textContent = '✓ 正确！';
+                        resultDiv.className = 'correct visible';
+                    }
+                    
+                    setTimeout(() => {
+                        resultDiv.className = '';
+                        userInput = [];
+                    }, 500);
+                }
+            });
+    
+            key.addEventListener('mouseup', () => key.classList.remove('active'));
+            key.addEventListener('mouseleave', () => key.classList.remove('active'));
+        });
+    
+        // 随机生成功能
+        document.getElementById('randomBtn').addEventListener('click', () => {
+            if (isPlaying) return;
+            isActive = true;
+            const n = parseInt(document.getElementById('countSelect').value);
+            const notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+            
+            // 洗牌算法
+            for (let i = notes.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [notes[i], notes[j]] = [notes[j], notes[i]];
+            }
+            
+            randomSequence = notes.slice(0, n);
+            sequenceDiv.style.opacity = 1;
+            sequenceDiv.textContent = '🎵 ' + randomSequence.join(' ');
+            userInput = [];
+            resultDiv.textContent = '';
+            resultDiv.className = '';
+        });
+    
+        async function playCorrectSequence(sequence) {
+            isPlaying = true;
+            document.getElementById('randomBtn').disabled = true;
+            
+            for (const note of sequence) {
+                const key = document.querySelector(`.white-key[data-note="${note}"]`);
+                if (!key) continue;
+    
+                key.classList.add('highlight');
+                await audioManager.play(note);
+                
+                await new Promise(resolve => setTimeout(resolve, 800));
+                key.classList.remove('highlight');
+                await new Promise(resolve => setTimeout(resolve, 300));
+            }
+    
+            document.getElementById('randomBtn').disabled = false;
+            isPlaying = false;
+        }
+    </script>
+</body>
+</html> 
